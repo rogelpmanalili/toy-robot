@@ -1,0 +1,405 @@
+<!--
+
+Toy Robot Coding Challenge
+
+Instructions
+You are required to simulate a toy robot moving on a square tabletop, of dimensions 5 units x 5 units.
+
+There are no other obstructions on the table surface. The robot is free to roam around the surface of the table, but must be prevented from falling to destruction.
+
+Any movement that would result in the robot falling from the table must be prevented, however further valid movement commands must still be allowed.
+
+All commands should be discarded until a valid place command has been executed.
+
+The solution can be written in Javascript, Typescript, C#, C++ or Python. Ideally, it will be written in your strongest language.
+
+The UI can be provided via CLI, however you are free to expand on this.
+
+Keep it simple, keep it DRY, but don’t over complicate or over engineer.
+
+Provide test data to exercise the application.
+
+Include a README file with instructions on how to build/compile your solution and how to run it. Additionally, please mention any assumptions you've made.
+
+Share your code via a public GitHub repository, git bundle or zip file.
+
+We like to see how you work, not just the end result.
+
+Commands
+All commands should provide output indicating whether or not they succeeded.
+
+PLACE X,Y,DIRECTION
+X and Y are integers that indicate a location on the tabletop.
+DIRECTION is a string indicating which direction the robot should face. It it one of the four cardinal directions: NORTH, EAST, SOUTH or WEST.
+
+MOVE
+Instructs the robot to move 1 square in the direction it is facing.
+
+LEFT
+Instructs the robot to rotate 90° anticlockwise/counterclockwise.
+
+RIGHT
+Instructs the robot to rotate 90° clockwise.
+
+REPORT
+Outputs the robot's current location on the tabletop and the direction it is facing.    
+
+-->
+<html>
+
+    <head>
+        <title>Toy Robot Coding Challenge</title>
+        <style>
+			label {
+			display: inline-block;
+			/*width: 80px;*/
+			height: 25px;
+			}
+		  
+			/*table, td {
+			  border: 1px solid black;
+			}	*/
+
+			tr, td {
+			  height: 50px;
+			  width: 50px;
+			  text-align: center;
+			}			
+        </style>
+        <!--script src="toy_robot.js"></script--><!--optional external reference-->
+        <script language="javascript">
+			
+            function positionrobot() {
+
+                var x = document.getElementById("X");
+                var y = document.getElementById("Y");
+                var d = document.getElementById("D");
+
+                xlocation = parseInt(x.value);
+                ylocation = parseInt(y.value);
+
+                if (validate(x.value)) {
+					report("Invalid X value!");
+                    return false;
+                }
+
+                if (validate(y.value)) {
+					report("Invalid Y value!");
+                    return false;
+                }
+
+                if (d.value.length == 0) {
+					report("Cardinal Direction cannot be empty!");
+                    return false;
+                }
+
+                if (d.value.toUpperCase() !== 'NORTH' && d.value.toUpperCase() !== 'SOUTH' && d.value.toUpperCase() !== 'WEST' && d.value.toUpperCase() !== 'EAST') { 
+					report("Invalid Cardinal Direction!");
+                    return false;
+                }
+
+				output();
+            }
+
+            function robotrotateleft() {
+
+                var d = document.getElementById("D");
+
+                if (d.value.toUpperCase() == "NORTH") {
+                    d.value = "WEST";
+                } else if (d.value.toUpperCase() == "WEST") {
+                    d.value = "SOUTH"
+                } else if (d.value.toUpperCase() == "SOUTH") {
+                    d.value = "EAST"
+                } else if (d.value.toUpperCase() == "EAST") {
+                    d.value = "NORTH"
+                }
+				
+				output();
+            }
+
+            function robotrotateright() {
+
+                var d = document.getElementById("D");
+
+                if (d.value.toUpperCase() == "NORTH") {
+                    d.value = "EAST";
+                } else if (d.value.toUpperCase() == "WEST") {
+                    d.value = "NORTH"
+                } else if (d.value.toUpperCase() == "SOUTH") {
+                    d.value = "WEST"
+                } else if (d.value.toUpperCase() == "EAST") {
+                    d.value = "SOUTH"
+                }
+
+				output();
+            }
+
+            function moverobot() {
+
+                var d = document.getElementById("D");
+
+                if (d.value.toUpperCase() == "NORTH") {
+                    if (!validate(ylocation)) {
+                        ylocation = ylocation + 1;
+                    }
+					else {
+						return false;
+					}
+                }
+                else if (d.value.toUpperCase() == "SOUTH") {
+                    if (!validate(ylocation)) {
+                        //if (ylocation==2) {
+						//	ylocation = ylocation - 1;
+						//}
+						//else { 
+						ylocation = ylocation + 1; 
+						//}
+                    }
+					else {
+						return false;
+					}
+				}
+                else if (d.value.toUpperCase() == "EAST") {
+                    if (!validate(xlocation)) {
+                        xlocation = xlocation + 1;
+                    }
+					else {
+						return false;
+					}					
+                } 
+                else if (d.value.toUpperCase() == "WEST") {
+                    if (!validate(xlocation)) {
+                        //if (xlocation==2) {
+						//	xlocation = xlocation - 1;
+						//}
+						//else { 
+						xlocation = xlocation + 1; 
+						//}
+                    }
+					else {
+						return false;
+					}					
+                }				
+
+				output();
+            }
+
+            function validate(xy) {
+                if (xy === "" || isNaN(xy) || parseInt(xy) > 4 || parseInt(xy) < 0 || xy === "-0") {
+					report("Out of range!");			
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+			
+			function output() {
+                var x = document.getElementById("X");
+                var y = document.getElementById("Y");			
+				var d = document.getElementById("D");
+				xCurrentLocation = xlocation;
+                yCurrentLocation = ylocation;
+                console.log("Place " + x.value + ", " + y.value + ", " + d.value.toUpperCase());				
+				report(xCurrentLocation + ", " + yCurrentLocation + ", " + d.value.toUpperCase());
+				
+				var tbl = document.getElementById("tblboard"), rows = tbl.rows, rowcount = rows.length, r, cells, cellcount, c, cell;
+				for (r=0; r<rowcount; r++) {
+					if (r==5) {break;}
+					cells = rows[r].cells;	
+					cellcount = cells.length;
+					for(c=0; c<cellcount; c++) {
+						cell = cells[c+1];
+						cell.innerHTML = "";
+						cell.style.backgroundColor="#fff";
+						if (c==4) {break;}
+					}
+				}
+				for (i = 0; tbl.rows.length; i++) {
+					if (d.value.toUpperCase() == "NORTH" || d.value.toUpperCase() == "EAST" || d.value.toUpperCase() == "WEST" || d.value.toUpperCase() == "SOUTH") {
+						if (xlocation==0 && ylocation==0) {
+						setcell(parseInt(xlocation)+4,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+4].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+4].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";
+						}
+						else if (xlocation==1 && ylocation==0) {
+						setcell(parseInt(xlocation)+3,parseInt(ylocation)+2,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+3].cells[parseInt(ylocation)+2].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+3].cells[parseInt(ylocation)+2].style.backgroundColor="cyan";
+						}					
+						else if (xlocation==2 && ylocation==0) {
+						setcell(parseInt(xlocation)+2,parseInt(ylocation)+3,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+3].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+3].style.backgroundColor="cyan";
+						}						
+						else if (xlocation==3 && ylocation==0) {
+						setcell(parseInt(xlocation)+1,parseInt(ylocation)+4,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)+4].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)+4].style.backgroundColor="cyan";
+						}
+						else if (xlocation==4 && ylocation==0) {
+						setcell(parseInt(xlocation),parseInt(ylocation)+5,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+0].cells[parseInt(ylocation)+5].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+0].cells[parseInt(ylocation)+5].style.backgroundColor="cyan";
+						}						
+						else if (xlocation==0 && ylocation==1) {
+						setcell(parseInt(xlocation)+3,parseInt(ylocation),d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+3].cells[parseInt(ylocation)+0].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+3].cells[parseInt(ylocation)+0].style.backgroundColor="cyan";
+						}
+						else if (xlocation==0 && ylocation==2) {
+						setcell(parseInt(xlocation)+2,parseInt(ylocation)-1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)-1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)-1].style.backgroundColor="cyan";
+						}						
+						else if (xlocation==0 && ylocation==3) {
+						setcell(parseInt(xlocation)+1,parseInt(ylocation)-2,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)-2].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)-2].style.backgroundColor="cyan";
+						}
+						else if (xlocation==0 && ylocation==4) {
+						setcell(parseInt(xlocation),parseInt(ylocation)-3,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+0].cells[parseInt(ylocation)-3].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+0].cells[parseInt(ylocation)-3].style.backgroundColor="cyan";
+						}	
+						else if (xlocation==1 && ylocation==1) {
+						setcell(parseInt(xlocation)+2,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";
+						}	
+						else if (xlocation==1 && ylocation==2) {
+						setcell(parseInt(xlocation)+1,parseInt(ylocation),d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)].style.backgroundColor="cyan";
+						}		
+						else if (xlocation==1 && ylocation==3) {
+						setcell(parseInt(xlocation)+2,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";
+						}
+						else if (xlocation==1 && ylocation==4) {
+						setcell(parseInt(xlocation)+2,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+2].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";
+						}
+						else if (xlocation==2 && ylocation==2) {
+						setcell(parseInt(xlocation),parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";						
+						}
+						else if (xlocation==3 && ylocation==3) {
+						setcell(parseInt(xlocation)-2,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-2].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-2].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";						
+						}	
+						else if (xlocation==4 && ylocation==4) {
+						setcell(parseInt(xlocation)-4,parseInt(ylocation)+1,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-4].cells[parseInt(ylocation)+1].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-4].cells[parseInt(ylocation)+1].style.backgroundColor="cyan";						
+						}		
+						else if (xlocation==2 && ylocation==1) {
+						setcell(parseInt(xlocation)+1,parseInt(ylocation)+2,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)+2].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)+1].cells[parseInt(ylocation)+2].style.backgroundColor="cyan";						
+						}	
+						else if (xlocation==3 && ylocation==1) {
+						setcell(parseInt(xlocation),parseInt(ylocation)+3,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)].cells[parseInt(ylocation)+3].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)].cells[parseInt(ylocation)+3].style.backgroundColor="cyan";						
+						}	
+						else if (xlocation==3 && ylocation==2) {
+						setcell(parseInt(xlocation)-1,parseInt(ylocation)+2,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-1].cells[parseInt(ylocation)+2].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-1].cells[parseInt(ylocation)+2].style.backgroundColor="cyan";						
+						}		
+						else if (xlocation==3 && ylocation==4) {
+						setcell(parseInt(xlocation)-3,parseInt(ylocation),d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-3].cells[parseInt(ylocation)].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-3].cells[parseInt(ylocation)].style.backgroundColor="cyan";						
+						}	
+						else if (xlocation==2 && ylocation==3) {
+						setcell(parseInt(xlocation)-1,parseInt(ylocation),d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-1].cells[parseInt(ylocation)].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-1].cells[parseInt(ylocation)].style.backgroundColor="cyan";						
+						}	
+						else if (xlocation==4 && ylocation==3) {
+						setcell(parseInt(xlocation)-3,parseInt(ylocation)+2,d.value.toUpperCase().charAt());
+						//tbl.rows[parseInt(xlocation)-3].cells[parseInt(ylocation)+2].innerHTML = d.value.toUpperCase().charAt();
+						//tbl.rows[parseInt(xlocation)-3].cells[parseInt(ylocation)+2].style.backgroundColor="cyan";						
+						}						
+						break;
+					}
+				}
+			}
+			
+			function report(msg) {
+				document.getElementById("reportoutput").innerHTML = "Output: " + msg;
+				document.getElementById("reportoutput").style.width = "500px";
+				console.log('Output: '  + msg);			
+			}
+			
+			function setcell(x,y,d) {
+				var tbl = document.getElementById("tblboard")
+				tbl.rows[x].cells[y].innerHTML = d;
+				tbl.rows[x].cells[y].style.backgroundColor="cyan";	
+			}
+        </script>
+      </head>
+
+<body>
+
+<input type="text" id="X" name="X" title="X an integer that indicate a location on the tabletop.">
+<label for="X">X [0 to 4]</label><br>
+
+<input type="text" id="Y" name="Y" title="Y an integer that indicate a location on the tabletop.">
+<label for="Y">Y [0 to 4]</label><br>
+
+<input type="text" id="D" name="D" title="DIRECTION is a string indicating which direction the robot should face. It it one of the four cardinal directions: NORTH, EAST, SOUTH or WEST.">
+<label for="D">Direction [NORTH, EAST, SOUTH, WEST]</label><br><br>
+
+<input type="button" id="btnPlaceRobot" name="btnPlaceRobot" value="REPORT" title="Outputs the robot's current location on the tabletop and the direction it is facing." onclick="positionrobot();"><br><br>
+
+<input type="button" id="btnleft" name="btnleft" value="LEFT" title="Instructs the robot to rotate 90° anticlockwise/counterclockwise." onclick="robotrotateleft();"><br><br>
+
+<input type="button" id="btnmove" name="btnmove" value="MOVE" title="Instructs the robot to move 1 square in the direction it is facing." onclick="moverobot();"><br><br>
+
+<input type="button" id="btnright" name="btnright" value="RIGHT" title="Instructs the robot to rotate 90° clockwise." onclick="robotrotateright();"><br><br>
+
+<label for="o" id="reportoutput">Output:</label>
+<br><br>
+<table id="tblboard" border="1">
+<tr>
+	<td>4</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+	<td>3</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+	<td>2</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+	<td>1</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+	<td>0</td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+	<td>NESW
+		<!--table style="border:0 !important;">
+		<tr><td></td><td>N</td><td></td></tr>
+		<tr><td>W</td><td></td><td>E</td></tr>
+		<tr><td></td><td>S</td><td></td></tr>
+		</table-->
+	</td>
+	<td>0</td><td>1</td><td>2</td><td>3</td><td>4</td>
+</tr>
+</table>
+
+
+
+</body>
+
+
+
+</html>

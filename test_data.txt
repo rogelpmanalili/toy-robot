@@ -1,0 +1,91 @@
+Below few scenarios to test the program.
+
+Scenario 1: X and Y data validation. Only numeric value is allowed and between 0 to 4.
+
+PLACE X,0,NORTH 
+REPORT
+
+Output: Invalid X value!
+
+PLACE 0,Y,NORTH 
+REPORT
+
+Output: Invalid Y value!
+
+PLACE 5,0,NORTH 
+REPORT
+
+Output: Invalid X value!
+
+***
+
+Scenario 2: Cardinal Direction data validation. Only accepts NORTH, EAST, SOUTH, WEST.
+
+PLACE 0,0, 
+REPORT
+
+Output: Cardinal Direction cannot be empty!
+
+PLACE 0,0,DIRECTION 
+REPORT
+
+Output: Invalid Cardinal Direction!
+
+***
+
+Scenario 3: Locate robot in valid location and direction
+
+PLACE 0,0,WEST
+REPORT
+
+Output: 0,0,WEST
+
+***
+
+Scenario 4: While robot is in valid location and direction, rotate to RIGHT (robot will face EAST)
+PLACE 1,1,NORTH
+RIGHT
+REPORT
+
+Output: 1,1,EAST
+
+***
+
+Scenario 5: While robot is in valid location and direction, rotate to LEFT (robot will face WEST)
+PLACE 1,1,NORTH
+RIGHT
+REPORT
+
+Output: 1,1,WEST
+
+***
+
+Scenario 6: While robot is in valid location and direction, move in all four cardinal directions
+PLACE 1,1,NORTH
+MOVE
+RIGHT
+MOVE
+RIGHT
+MOVE
+RIGHT
+MOVE
+RIGHT
+
+Output: 
+1,2,EAST
+2,2,SOUTH
+2,1,WEST
+1,1,NORTH
+
+***
+
+Scenario 7: robot should not move to prevent from falling
+PLACE 4,4,NORTH
+MOVE
+MOVE
+MOVE
+MOVE
+MOVE
+
+Output: Out of range!
+
