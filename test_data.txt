@@ -89,3 +89,90 @@ MOVE
 
 Output: Out of range!
 
+
+
+////////
+
+
+Creating a complete and fully functional test/exam system involves multiple components, and providing the entire code here may be extensive. However, I can guide you on how to structure the code using SharePoint and JavaScript. Please note that this example assumes you are using SharePoint lists for storing questions and user results.
+
+**1. Set up SharePoint Lists:**
+   - Create three lists: one for user details, one for questions, and one for storing user results.
+   - Include columns like `UserID`, `UserName`, `TestLanguage`, `QuestionText`, `OptionA`, `OptionB`, `OptionC`, `CorrectOption`, etc.
+
+**2. JavaScript Code:**
+
+```javascript
+// Assume you have jQuery loaded in your SharePoint environment
+
+$(document).ready(function () {
+  // Check if user has already taken the test
+  checkIfUserTakenTest();
+
+  // Timer for 15 minutes
+  setTimeout(function () {
+    submitTest();
+  }, 900000); // 15 minutes
+
+  // Submit button click event
+  $('#submitBtn').on('click', function () {
+    submitTest();
+  });
+});
+
+function checkIfUserTakenTest() {
+  // Your logic to check if the user has already taken the test
+  // You might want to use SharePoint REST API to query the results list
+}
+
+function submitTest() {
+  // Your logic to calculate the score
+  var score = calculateScore();
+
+  // Display pass/fail message
+  var resultMessage = (score >= passingScore) ? 'Passed' : 'Failed';
+  alert('You ' + resultMessage + '. Your score: ' + score);
+
+  // Save the result to SharePoint
+  saveResult(score);
+}
+
+function calculateScore() {
+  // Your logic to calculate the score based on user's answers
+  var score = 0;
+
+  // Example: Loop through questions and check user's selected option
+  $('input[name="question"]').each(function () {
+    var selectedOption = $('input[name="question"]:checked').val();
+    var correctOption = $(this).data('correctOption');
+
+    if (selectedOption === correctOption) {
+      score++;
+    }
+  });
+
+  return score;
+}
+
+function saveResult(score) {
+  // Your logic to save the result to SharePoint
+  // Use SharePoint REST API to add a new item to the results list
+}
+```
+
+**3. HTML:**
+
+```html
+<!-- Your HTML structure for the test -->
+<div>
+  <!-- Questions and options go here -->
+  <input type="radio" name="question" value="A" data-correct-option="A"> Option A
+  <input type="radio" name="question" value="B" data-correct-option="B"> Option B
+  <input type="radio" name="question" value="C" data-correct-option="C"> Option C
+
+  <!-- Submit button -->
+  <button id="submitBtn">Submit Test</button>
+</div>
+```
+
+This is a basic structure, and you may need to modify it based on your specific requirements and the SharePoint structure you have in place. Additionally, you should implement proper error handling, validation, and security measures based on your application's needs.
