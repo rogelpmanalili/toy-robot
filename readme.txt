@@ -177,3 +177,79 @@ $(document).ready(function () {
     // Fetch questions when the page is loaded
     getQuestions();
 });
+
+
+language
+
+// Sample JavaScript using SharePoint REST API
+
+// Function to get questions from SharePoint
+function getQuestions(languageCode) {
+    var apiUrl = _spPageContextInfo.webAbsoluteUrl +
+        "/_api/web/lists/getbytitle('Questions')/items?$select=ID,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer&$filter=LanguageLookupField eq '" + languageCode + "'";
+
+    return $.ajax({
+        url: apiUrl,
+        method: "GET",
+        headers: {
+            "Accept": "application/json; odata=verbose"
+        }
+    });
+}
+
+// Function to display questions on the webpage
+function displayQuestions(questions) {
+    // Iterate through the questions and build the HTML
+    questions.forEach(function (question) {
+        var html = "<div>";
+        html += "<p>" + question.QuestionText + "</p>";
+        html += "<label><input type='radio' name='q" + question.ID + "' value='A'>" + question.OptionA + "</label><br>";
+        html += "<label><input type='radio' name='q" + question.ID + "' value='B'>" + question.OptionB + "</label><br>";
+        html += "<label><input type='radio' name='q" + question.ID + "' value='C'>" + question.OptionC + "</label><br>";
+        html += "<label><input type='radio' name='q" + question.ID + "' value='D'>" + question.OptionD + "</label><br>";
+        html += "</div>";
+
+        // Append the HTML to a container element on your page
+        $("#questionsContainer").append(html);
+    });
+}
+
+// Sample usage
+var selectedLanguageCode = "en"; // English language code
+getQuestions(selectedLanguageCode).done(function (data) {
+    var questions = data.d.results;
+    displayQuestions(questions);
+});
+
+
+
+
+timer
+
+var siteUrl = "Your SharePoint Site URL";
+var listName = "Your Questions List Name";
+
+var endpoint = siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items";
+
+var timer = 900; // 15 minutes in seconds
+
+var countdown = setInterval(function() {
+    timer--;
+    // Update the timer display
+    document.getElementById('timer').innerHTML = formatTime(timer);
+
+    // Check if the time has run out
+    if (timer <= 0) {
+        clearInterval(countdown);
+        // Implement logic for submitting the test or ending the test
+    }
+}, 1000);
+
+function formatTime(seconds) {
+    var minutes = Math.floor(seconds / 60);
+    var remainingSeconds = seconds % 60;
+    return minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds;
+}
+
+
+
