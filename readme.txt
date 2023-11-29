@@ -253,3 +253,222 @@ function formatTime(seconds) {
 
 
 
+/////////
+
+function checkIfUserHasTakenExam(userId, examDate) {
+    // SharePoint list URL for exam results
+    var resultsListUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Results')/items";
+
+    // Use the $filter parameter to specify the criteria
+    var filter = "$filter=UserId eq " + userId + " and ExamDate eq '" + examDate + "'";
+
+    // Make the REST API call
+    $.ajax({
+        url: resultsListUrl + "?" + filter,
+        method: "GET",
+        headers: { "Accept": "application/json;odata=verbose" },
+        success: function (data) {
+            if (data.d.results.length > 0) {
+                // User has taken the exam on the specified date
+                console.log("User has taken the exam on " + examDate);
+            } else {
+                // User has not taken the exam on the specified date
+                console.log("User has not taken the exam on " + examDate);
+            }
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+// Example usage
+var userIdToCheck = 123; // Replace with the actual user ID
+var examDateToCheck = "2023-01-01"; // Replace with the actual exam date
+checkIfUserHasTakenExam(userIdToCheck, examDateToCheck);
+
+
+
+
+//////
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-language Exam System</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h2 id="question"></h2>
+    <label><input type="radio" name="answer" value="A"> <span id="textA"></span></label><br>
+    <label><input type="radio" name="answer" value="B"> <span id="textB"></span></label><br>
+    <label><input type="radio" name="answer" value="C"> <span id="textC"></span></label><br>
+    <button onclick="submitExam()">Submit Exam</button>
+    <div id="result"></div>
+
+    <script>
+        var currentQuestionIndex = 0;
+        var questions;
+        var language = "en"; // Default language (you can handle language selection as needed)
+        var userId = _spPageContextInfo.userId;
+
+        $(document).ready(function () {
+            checkIfUserHasTakenExam();
+        });
+
+        function checkIfUserHasTakenExam() {
+            // Make a REST API call to check if the user has taken the exam
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Results')/items",
+                method: "GET",
+                headers: { "Accept": "application/json; odata=verbose" },
+                data: {
+                    "$filter": "UserId eq " + userId
+                },
+                success: function (data) {
+                    if (data.d.results.length > 0) {
+                        // User has already taken the exam, show their score
+                        displayUserScore(data.d.results);
+                    } else {
+                        // Load questions for the exam
+                        loadQuestions();
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function loadQuestions() {
+            // Make a REST API call to get questions based on language
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('ExamQuestions')/items",
+                method: "GET",
+                headers: { "Accept": "application/json; odata=verbose" },
+                data: {
+                    "$filter": "Language eq '" + language + "'"
+                },
+                success: function (data) {
+                    questions = data.d.results;
+                    displayQuestion();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function displayQuestion() {
+            var question = questions[currentQuestionIndex];
+            $("#question").text(question.QuestionText);
+            $("#textA").text(question.OptionA);
+            $("#textB").text(question.OptionB);
+            $("#textC").text(question.OptionC);
+        }
+
+        function submitExam() {
+            var selectedAnswer = $("input[name='answer']:checked").val();
+            var correctAnswer = questions[currentQuestionIndex].CorrectAnswer;
+            var isCorrect = selectedAnswer === correctAnswer;
+
+            $("#result").text(isCorrect ? "Pass" : "Fail");
+
+            // Save results to SharePoint (adjust the URL and data structure accordingly)
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Results')/items",
+                method: "POST",
+                contentType: "application/json;odata=verbose",
+                data: JSON.stringify({
+                    UserId: userId,
+                    QuestionId: questions[currentQuestionIndex].Id,
+                    SelectedAnswer: selectedAnswer,
+                    IsCorrect: isCorrect,
+                    Language: language
+                }),
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                },
+                success: function (data) {
+                    console.log("Result saved: " + data.d.Id);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // Move to the next question or end the exam
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                $("#question").text("Exam Completed");
+                $(".options").hide();
+                $("#result").text("Exam Completed");
+            }
+        }
+
+        function displayUserScore(results) {
+            // Calculate and display user's score based on results
+            var correctAnswers = results.filter(function (result) {
+                return result.IsCorrect;
+            }).length;
+
+            var totalQuestions = results.length;
+            var userScore = (correctAnswers / totalQuestions) * 100;
+
+            $("#result").text("You have already taken the exam. Your score is: " + userScore.toFixed(2) + "%");
+        }
+    </script>
+</body>
+</html>
+
+
+///////
+
+// SharePoint list URL
+var listUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('YourList')/items";
+
+// Function to get top 10 fixed records
+function getTopFixedRecords() {
+    $.ajax({
+        url: listUrl + "?$top=10",
+        method: "GET",
+        headers: { "Accept": "application/json; odata=verbose" },
+        success: function (data) {
+            var topRecords = data.d.results;
+            // Process top 10 records
+            console.log("Top 10 Records:", topRecords);
+
+            // Get the rest of the records randomly
+            getRandomRecords();
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+// Function to get the rest of the records randomly
+function getRandomRecords() {
+    $.ajax({
+        url: listUrl + "?$skip=10", // Skip the top 10 records
+        method: "GET",
+        headers: { "Accept": "application/json; odata=verbose" },
+        success: function (data) {
+            var restOfRecords = data.d.results;
+            // Process the rest of the records randomly
+            restOfRecords.sort(() => Math.random() - 0.5);
+            console.log("Rest of the Records (Random):", restOfRecords);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+// Call the function to get top 10 fixed records
+getTopFixedRecords();
+
