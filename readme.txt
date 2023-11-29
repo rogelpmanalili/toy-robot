@@ -24,4 +24,156 @@ RIGHT
 Instructs the robot to rotate 90° clockwise.
 
 REPORT
-Outputs the robot's current location on the tabletop and the direction it is facing.    
+Outputs the robot's current location on the tabletop and the direction it is facing.   
+
+
+
+
+
+Html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam System</title>
+</head>
+<body>
+    <h1>Exam System</h1>
+    <div id="exam-container"></div>
+    <button onclick="submitExam()">Submit Exam</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="exam.js"></script>
+</body>
+</html>
+
+
+exam.js
+
+$(document).ready(function () {
+    // SharePoint API URL
+    var apiUrl = "<Your SharePoint API URL>";
+
+    // Function to fetch questions from SharePoint
+    function getQuestions() {
+        $.ajax({
+            url: apiUrl + "/_api/web/lists/getbytitle('Questions')/items",
+            method: "GET",
+            headers: { "Accept": "application/json; odata=verbose" },
+            success: function (data) {
+                // Process and display questions
+                displayQuestions(data.d.results);
+            },
+            error: function (error) {
+                console.log(JSON.stringify(error));
+            }
+        });
+    }
+
+    // Function to display questions in the exam form
+    function displayQuestions(questions) {
+        var examContainer = $("#exam-container");
+
+        questions.forEach(function (question) {
+            var options = question.Options.split(','); // Assuming options are stored as comma-separated values
+            var questionHtml = "<p>" + question.Question + "</p>";
+
+            options.forEach(function (option, index) {
+                questionHtml += "<input type='radio' name='q" + question.Id + "' value='" + option + "'>" + option + "<br>";
+            });
+
+            examContainer.append(questionHtml);
+        });
+    }
+
+    // Function to submit the exam
+    window.submitExam = function () {
+        var userResult = {};
+
+        // Collect user's answers
+        $("input[type='radio']:checked").each(function () {
+            var questionId = $(this).attr("name").substring(1);
+            var answer = $(this).val();
+            userResult[questionId] = answer;
+        });
+
+        // Calculate and display result
+        var pass = calculateResult(userResult);
+        alert(pass ? "Congratulations! You passed!" : "Sorry, you failed.");
+
+        // Save result to SharePoint
+        saveResult(userResult, pass);
+
+        // Send result via email (you would need a server-side component for this)
+        sendEmail(userResult, pass);
+    };
+
+    // Function to calculate the result
+    function calculateResult(userResult) {
+        // Implement your logic to compare user answers with correct answers
+        // For simplicity, let's assume at least 50% correct answers for passing
+        var correctAnswers = 0;
+        var totalQuestions = Object.keys(userResult).length;
+
+        // Assuming correct answers are stored in SharePoint along with questions
+        // Adjust this part based on your data structure
+        $.ajax({
+            url: apiUrl + "/_api/web/lists/getbytitle('Questions')/items",
+            method: "GET",
+            headers: { "Accept": "application/json; odata=verbose" },
+            success: function (data) {
+                data.d.results.forEach(function (question) {
+                    if (userResult[question.Id] === question.CorrectAnswer) {
+                        correctAnswers++;
+                    }
+                });
+            },
+            error: function (error) {
+                console.log(JSON.stringify(error));
+            },
+            async: false // Ensure the correctAnswers count is available before proceeding
+        });
+
+        return (correctAnswers / totalQuestions) >= 0.5;
+    }
+
+    // Function to save the result to SharePoint
+    function saveResult(userResult, pass) {
+        // Implement logic to update the SharePoint list with user results
+        // You may need to add a column "UserResult" to the list for this
+        // Adjust this part based on your data structure
+        $.each(userResult, function (questionId, answer) {
+            var itemId = parseInt(questionId);
+            $.ajax({
+                url: apiUrl + "/_api/web/lists/getbytitle('Questions')/items(" + itemId + ")",
+                method: "MERGE",
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose",
+                    "X-HTTP-Method": "MERGE",
+                    "If-Match": "*"
+                },
+                data: JSON.stringify({
+                    UserResult: pass ? "Pass" : "Fail"
+                }),
+                success: function (data) {
+                    console.log("Result saved successfully");
+                },
+                error: function (error) {
+                    console.log(JSON.stringify(error));
+                }
+            });
+        });
+    }
+
+    // Function to send the result via email (you would need a server-side component for this)
+    function sendEmail(userResult, pass) {
+        // Implement logic to send an email with the result
+        // This typically involves a server-side component to handle email sending
+        // Adjust this part based on your email sending mechanism
+    }
+
+    // Fetch questions when the page is loaded
+    getQuestions();
+});
