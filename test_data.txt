@@ -176,3 +176,86 @@ function saveResult(score) {
 ```
 
 This is a basic structure, and you may need to modify it based on your specific requirements and the SharePoint structure you have in place. Additionally, you should implement proper error handling, validation, and security measures based on your application's needs.
+
+
+
+
+
+
+/////////
+To achieve this in SharePoint using the REST API, you can leverage the `$filter` and `$orderby` query options to filter and order the results based on your criteria. Below is a sample REST API query that fetches mandatory records with a "yes" value and randomly selects the top 2 records for each category:
+
+```javascript
+var siteUrl = "https://your-sharepoint-site-url";
+var listName = "YourListName";
+
+// Construct the REST API endpoint URL
+var endpointUrl = siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$filter=mandatory eq 'yes'&$orderby=category asc";
+
+// Make the REST API request
+$.ajax({
+    url: endpointUrl,
+    method: "GET",
+    headers: {
+        "Accept": "application/json;odata=verbose"
+    },
+    success: function (data) {
+        // Process the data to get random top 2 for each category
+        var results = processData(data.d.results);
+
+        // Output the results
+        console.log(results);
+    },
+    error: function (error) {
+        console.log("Error: " + JSON.stringify(error));
+    }
+});
+
+// Function to process the data and get random top 2 for each category
+function processData(items) {
+    var result = {};
+    var categories = {};
+
+    // Group items by category
+    items.forEach(function (item) {
+        if (!categories[item.category]) {
+            categories[item.category] = [];
+        }
+        categories[item.category].push(item);
+    });
+
+    // Get random top 2 for each category
+    for (var category in categories) {
+        var randomTop2 = getRandomTop2(categories[category]);
+        result[category] = randomTop2;
+    }
+
+    return result;
+}
+
+// Function to get random top 2 items from an array
+function getRandomTop2(array) {
+    var shuffled = array.slice(0);
+    var i = array.length;
+    var min = i - 2;
+    var temp, index;
+
+    while (i-- > min) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[index];
+        shuffled[index] = shuffled[i];
+        shuffled[i] = temp;
+    }
+
+    return shuffled.slice(min);
+}
+```
+
+Please note the following:
+
+1. Replace `"https://your-sharepoint-site-url"` with the actual URL of your SharePoint site.
+2. Replace `"YourListName"` with the actual name of your SharePoint list.
+3. Ensure that you have the appropriate permissions to access the list data.
+
+This script makes use of the `$filter` query option to filter records where the "mandatory" column is equal to "yes" and the `$orderby` query option to sort the results by the "category" column in ascending order. The `processData` function groups items by category and selects random top 2 for each category using the `getRandomTop2` function. Finally, the processed data is logged to the console.
+
