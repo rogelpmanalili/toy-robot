@@ -356,5 +356,46 @@ override form submit
 </script>
 
 
+///// onchange populate droplist
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Attach an event handler to the change event of the first dropdown
+        $('#Dropdown1').change(function () {
+            // Get the selected value from the first dropdown
+            var selectedValue = $(this).val();
+
+            // Call a function to populate the second dropdown based on the selected value
+            populateDropdown2(selectedValue);
+        });
+
+        // Function to populate the second dropdown based on the selected value
+        function populateDropdown2(selectedValue) {
+            // Clear existing options in the second dropdown
+            $('#Dropdown2').empty();
+
+            // Use REST API to fetch data from the second list based on the selected value
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('List2')/items?$filter=Field1 eq '" + selectedValue + "'",
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;odata=verbose"
+                },
+                success: function (data) {
+                    // Iterate through the retrieved data and populate the second dropdown
+                    $.each(data.d.results, function (index, item) {
+                        // Assuming 'Title' is the field you want to display in the second dropdown
+                        $('#Dropdown2').append('<option value="' + item.Title + '">' + item.Title + '</option>');
+                    });
+                },
+                error: function (error) {
+                    console.log("Error fetching data from List2: " + JSON.stringify(error));
+                }
+            });
+        }
+    });
+</script>
+
 
 
