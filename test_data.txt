@@ -259,3 +259,86 @@ Please note the following:
 
 This script makes use of the `$filter` query option to filter records where the "mandatory" column is equal to "yes" and the `$orderby` query option to sort the results by the "category" column in ascending order. The `processData` function groups items by category and selects random top 2 for each category using the `getRandomTop2` function. Finally, the processed data is logged to the console.
 
+
+
+
+///
+
+update another list
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Override the default form submission
+        $('form').submit(function (e) {
+            e.preventDefault();
+
+            // Get data from the current form (List A)
+            var formData = {
+                // Extract data from the form fields
+                Field1: $('#Field1').val(),
+                Field2: $('#Field2').val(),
+                // ... add other fields as needed
+            };
+
+            // Use REST API to update List B
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('ListB')/items",
+                method: "POST",
+                contentType: "application/json;odata=verbose",
+                data: JSON.stringify(formData),
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                },
+                success: function (data) {
+                    // Handle success
+                    console.log("Item added to List B");
+                },
+                error: function (error) {
+                    // Handle error
+                    console.log("Error adding item to List B: " + JSON.stringify(error));
+                }
+            });
+        });
+    });
+</script>
+
+
+/////
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Override the default form submission
+        $('input[type=button]').click(function () {
+            // Get data from the current form (List A)
+            var formData = {
+                Title: $('input[title="Title"]').val(),
+                // Add other fields as needed
+            };
+
+            // Use REST API to update List B
+            $.ajax({
+                url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('ListB')/items",
+                method: "POST",
+                contentType: "application/json;odata=verbose",
+                data: JSON.stringify(formData),
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                },
+                success: function (data) {
+                    // Handle success
+                    console.log("Item added to List B");
+                },
+                error: function (error) {
+                    // Handle error
+                    console.log("Error adding item to List B: " + JSON.stringify(error));
+                }
+            });
+        });
+    });
+</script>
+
+
+
