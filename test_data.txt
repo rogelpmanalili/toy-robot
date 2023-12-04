@@ -341,4 +341,20 @@ update another list
 </script>
 
 
+///////
+override form submit
+<script type="text/javascript">
+    function overrideFormSubmit() {
+        // Your custom logic here
+
+        // Prevent the default form submission
+        return false;
+    }
+
+    // Attach the override function to the form's onsubmit event
+    document.getElementById('aspnetForm').onsubmit = overrideFormSubmit;
+</script>
+
+
+
 
